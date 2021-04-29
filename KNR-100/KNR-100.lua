@@ -91,6 +91,22 @@ while true do
 	local energyStored = reactor.getEnergyStored()
 	local currentControlRodLevel = reactor.getControlRodLevel(0)
 
+	if currentHeat < 200 
+		br_reactor.setAllControlRodLevels(0)
+		lastError = "Underheat !"
+	end
+	if currentHeat > 1000 :
+		br_reactor.setAllControlRodLevels(70)
+		lastError = "Overheat !"
+	end
+
+	if suposedProduction > currentProduction and currentControlRodLevel ~= 0
+		br_reactor.setAllControlRodLevels(currentControlRodLevel - 1)
+	end
+	if suposedProduction < currentProduction and currentControlRodLevel ~= 100
+		br_reactor.setAllControlRodLevels(currentControlRodLevel + 1)
+	end
+
 	local event, adress, arg1, arg2, arg3 = event.pull(1)
 	if event == "key_down" then
 		eventhandler(arg2)
