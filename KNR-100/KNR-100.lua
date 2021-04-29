@@ -5,6 +5,7 @@ local event = require("event")
 
 local reactor = component.br_reactor
 local gpu = component.gpu
+local keyboard = component.keyboard
 
 
 -- Get resolution of the current screen
@@ -21,12 +22,24 @@ local function restefg()
 	gpu.setForeground(0xffffff)
 end
 
-local function eventhandler (eventType)
-	print("eventType")
+local function eventhandler (opt)
+	print(opt)
+	if opt == 23 then --I
+		if reactor.getActive() == false then
+			reactor.setActive(true)
+		end
+	end
+	if opt == 24 then --O
+		if reactor.getActive() == true then	
+			reactor.setActive(false)
+		end
+	end
+	if opt == 14 then -- backspace
+		os.exit()
+	end
 end
 
 
-event.listen("key_down", eventhandler)
 
 -- Main program
 while true do 
@@ -49,50 +62,38 @@ while true do
 	end
 	gpu.setForeground(0xffffff)
 	print("statistiques:")
-	print("Fuel Temperature" + br_reactor.getFuelTemperature())
-	print("Case Temperature" + br_reactor.getCasingTemperature())
+	print("Fuel Temperature : " .. reactor.getFuelTemperature())
+	print("Case Temperature : " .. reactor.getCasingTemperature())
 	gpu.fill(1, 4, w, 1, "-")
-	local percentOfFuel = br_reactor.getFuelAmountMax() / br_reactor.getFUelAmount()
-	local percentOfWaste = br_reactor.getFuelAmountMax() / br_reactor.getWasteAmount()
-	print("Amount of fuel (in percent) : " + percentOfFuel)
-	print("Amount of waste (in percent) : " + percentOfWaste)
+	local percentOfFuel = reactor.getFuelAmount() / reactor.getFuelAmountMax() * 100
+	local percentOfWaste = reactor.getWasteAmount() / reactor.getFuelAmountMax() * 100
+	print("Amount of fuel (in percent) : " .. percentOfFuel)
+	print("Amount of waste (in percent) : " .. percentOfWaste)
 	gpu.setForeground(0xAAAAAA)
 	gpu.fill(1, 7, w, 1, "-")
 	restefg()
 	print("Security information :")
-	print("Insertion of " + br_reactor.getControlRodName(0) + " : " + br_reactor.getControlRodLevel())
+	print("Insertion of " .. reactor.getControlRodName(0) .. " : " .. reactor.getControlRodLevel(0))
 	gpu.setForeground(0xff5555)
 	gpu.fill(1, 10, w, 1, "-")
 	restefg()
 	print("Energy information :")
-	print("Enrgy Stored : " + br_reactor.getEnergyStored())
-	print("Energy produced last tick : " + br_reactor.getEnergyProducedLastTick())
+	print("Enrgy Stored : " .. reactor.getEnergyStored())
+	print("Energy produced last tick : " .. reactor.getEnergyProducedLastTick())
 	gpu.setForeground(0x0000AA)
 	gpu.fill(1, 14, w, 1, "-")
 	restefg()
 	print("Computing data :")
 
 
-	local currentHeat = br_reactor.getFuelTemperature()
-	local currentProduction = br_reactor.getEnergyProducedLastTick()
-	local energyStored = br_reactor.getEnergyStored()
-	local currentControlRodLevel = br_reactor.getControlRodLevel(0)
+	local currentHeat = reactor.getFuelTemperature()
+	local currentProduction = reactor.getEnergyProducedLastTick()
+	local energyStored = reactor.getEnergyStored()
+	local currentControlRodLevel = reactor.getControlRodLevel(0)
 
-	if currentHeat < 200 
-		br_reactor.setAllControlRodLevels(0)
-		lastError = "Underheat !"
+	local event, adress, arg1, arg2, arg3 = event.pull(1)
+	if event == "key_down" then
+		eventhandler(arg2)
 	end
-	if currentHeat > 1000 :
-		br_reactor.setAllControlRodLevels(70)
-		lastError = "Overheat !"
-	end
-
-	if suposedProduction > currentProduction and currentControlRodLevel ~= 0
-		br_reactor.setAllControlRodLevels(currentControlRodLevel - 1)
-	end
-	if suposedProduction < currentProduction and currentControlRodLevel ~= 100
-		br_reactor.setAllControlRodLevels(currentControlRodLevel + 1)
-	end
-
-	os.sleep(0,1)
+	os.sleep(2)
 end
