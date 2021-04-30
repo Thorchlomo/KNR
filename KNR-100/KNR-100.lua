@@ -12,7 +12,7 @@ local keyboard = component.keyboard
 local w,h = gpu.getResolution()
 
 local lastError = "No error for this time"
-local suposedProduction = 200
+local suposedProduction = 200	--Change here for the energy you want to produce
 
 local function clear()
 	term.clear()
