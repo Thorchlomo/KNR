@@ -91,19 +91,19 @@ while true do
 	local energyStored = reactor.getEnergyStored()
 	local currentControlRodLevel = reactor.getControlRodLevel(0)
 
-	if currentHeat < 200 
+	if currentHeat < 200 then
 		br_reactor.setAllControlRodLevels(0)
 		lastError = "Underheat !"
 	end
-	if currentHeat > 1000 :
+	if currentHeat > 1000 then
 		br_reactor.setAllControlRodLevels(70)
 		lastError = "Overheat !"
 	end
 
-	if suposedProduction > currentProduction and currentControlRodLevel ~= 0
+	if suposedProduction > currentProduction and currentControlRodLevel ~= 0 then
 		br_reactor.setAllControlRodLevels(currentControlRodLevel - 1)
 	end
-	if suposedProduction < currentProduction and currentControlRodLevel ~= 100
+	if suposedProduction < currentProduction and currentControlRodLevel ~= 100 then
 		br_reactor.setAllControlRodLevels(currentControlRodLevel + 1)
 	end
 
