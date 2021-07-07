@@ -92,19 +92,19 @@ while true do
 	local currentControlRodLevel = reactor.getControlRodLevel(0)
 
 	if currentHeat < 200 then
-		br_reactor.setAllControlRodLevels(0)
+		reactor.setAllControlRodLevels(0)
 		lastError = "Underheat !"
 	end
 	if currentHeat > 1000 then
-		br_reactor.setAllControlRodLevels(70)
+		reactor.setAllControlRodLevels(70)
 		lastError = "Overheat !"
 	end
 
 	if suposedProduction > currentProduction and currentControlRodLevel ~= 0 then
-		br_reactor.setAllControlRodLevels(currentControlRodLevel - 1)
+		reactor.setAllControlRodLevels(currentControlRodLevel - 1)
 	end
 	if suposedProduction < currentProduction and currentControlRodLevel ~= 100 then
-		br_reactor.setAllControlRodLevels(currentControlRodLevel + 1)
+		reactor.setAllControlRodLevels(currentControlRodLevel + 1)
 	end
 
 	local event, adress, arg1, arg2, arg3 = event.pull(1)
