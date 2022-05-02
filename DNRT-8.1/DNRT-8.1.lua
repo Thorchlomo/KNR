@@ -14,6 +14,7 @@ local w,h = gpu.getResolution()
 
 local lastError = "No error for this time"
 local suposedProduction = 200	--Change here for the energy you want to produce
+local suposedRPM = 0
 
 local function clear()
 	term.clear()
@@ -42,8 +43,8 @@ local function eventhandler (opt)
 	end
 end
 
-print("Veuillez entrer la production demandé")
-suposedProduction = tonumber(io.read())
+print("Veuillez entrer les RPM demandés")
+suposedRPM = tonumber(io.read())
 
 -- Main program
 while true do 
@@ -86,27 +87,31 @@ while true do
 	print("Fuel Temperature : " .. reactor.getFuelTemperature())
 	print("Case Temperature : " .. reactor.getCasingTemperature())
     print("Rotor Speed : " .. turbine.getRotorSpeed())
-	gpu.fill(1, 5, w, 1, "-")
+    print("Current fluid flow rate : " .. turbine.getFluidFlowRate)
+	gpu.fill(1, 6, w, 1, "-")
 	local percentOfFuel = reactor.getFuelAmount() / reactor.getFuelAmountMax() * 100
 	local percentOfWaste = reactor.getWasteAmount() / reactor.getFuelAmountMax() * 100
 	print("Amount of fuel (in percent) : " .. percentOfFuel)
 	print("Amount of waste (in percent) : " .. percentOfWaste)
 	gpu.setForeground(0xAAAAAA)
-	gpu.fill(1, 8, w, 1, "-")
+	gpu.fill(1, 9, w, 1, "-")
 	restefg()
 	print("Security information :")
 	print("Insertion of " .. reactor.getControlRodName(0) .. " : " .. reactor.getControlRodLevel(0))
     print("Insertion of " .. reactor.getControlRodName(1) .. " : " .. reactor.getControlRodLevel(1))
     print("Insertion of " .. reactor.getControlRodName(2) .. " : " .. reactor.getControlRodLevel(2))
     print("Insertion of " .. reactor.getControlRodName(3) .. " : " .. reactor.getControlRodLevel(3))
+    print("Fluid flow rate max : " .. turbine.getFluidFlowrateMax)
+    print("Reactor on : " .. reactor.getActive())
+    print("Turbine on : " .. turbine.getActive())
 	gpu.setForeground(0xff5555) -- 0 due to turbine
-	gpu.fill(1, 14, w, 1, "-")
+	gpu.fill(1, 18, w, 1, "-")
 	restefg()
 	print("Energy information :")
 	print("Enrgy Stored : " .. turbine.getEnergyStored())
 	print("Energy produced last tick : " .. turbine.getEnergyProducedLastTick())
 	gpu.setForeground(0x0000AA)
-	gpu.fill(1, 18, w, 1, "-")
+	gpu.fill(1, 22, w, 1, "-")
 	restefg()
 	print("Computing data :")
 
@@ -116,44 +121,56 @@ while true do
 	local energyStored = turbine.getEnergyStored()
 	local currentControlRodLevel = reactor.getControlRodLevel(0)
     local coilEngaged = turbine.getInductorEngaged()
+    local fluidFlowRateMax = turbine.getFluidFlowrateMax()
+
 
     --Emergency Stop Zone
 
 	if currentHeat < 200 then
 		reactor.setAllControlRodLevels(0)
 		lastError = "Underheat !"
-        computer.beep(1000)
+        computer.beep()
 	end
 	if currentHeat > 1000 then
 		reactor.setAllControlRodLevels(70)
 		lastError = "Overheat !"
-        computer.beep(1000, 20)
+        computer.beep()
 	end
 
     if stateOfTurbine < 200 then
         turbine.setInductorEngaged(false)
 		lastError = "Under speed !"
-        computer.beep(1000)
+        computer.beep()
 	end
-	if stateOfTurbine > 2000 then
+	if stateOfTurbine > 2800 then
         turbine.setVentAll()
 		turbine.setInductorEngaged(true)
 		lastError = "Over speed !"
-        computer.beep(1000, 20)
+        computer.beep()
 	end
 
-	if suposedProduction > currentProduction and currentControlRodLevel ~= 0 then
-		reactor.setAllControlRodLevels(currentControlRodLevel - 1)
-	end
-	if suposedProduction < currentProduction and currentControlRodLevel ~= 100 then
-		reactor.setAllControlRodLevels(currentControlRodLevel + 1)
-	end
+--	if suposedProduction > currentProduction and currentControlRodLevel ~= 0 then
+--		reactor.setAllControlRodLevels(currentControlRodLevel - 1)
+--	end
+--	if suposedProduction < currentProduction and currentControlRodLevel ~= 100 then
+--		reactor.setAllControlRodLevels(currentControlRodLevel + 1)
+--	end
+
+    if suposedRPM > stateOfTurbine and currentControlRodLevel ~= 0 and fluidFlowRateMax < 2000 then
+        turbine.setFluidFlowRateMax(fluidFlowRateMax + 1)
+        reactor.setAllControlRodLevels(currentControlRodLevel - 1)
+    end
+    if suposedRPM < stateOfTurbine and currentControlRodLevel ~= 100 and fluidFlowRateMax > 0 then
+        turbine.setFluidFlowRateMax(fluidFlowRateMax - 1)
+        reactor.setAllControlRodLevels(currentControlRodLevel + 1)
+    end
 
     if currentProduction == 0 and coilEngaged == false then
         turbine.setInductorEngaged(true)
+    end
     if stateOfTurbine < 200 and turbine.getFluidFlowRate() == 0 then
         turbine.setVentNone()
-
+    end
 
 	local event, adress, arg1, arg2, arg3 = event.pull(1)
 	if event == "key_down" then
