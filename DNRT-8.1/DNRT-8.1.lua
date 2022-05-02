@@ -87,7 +87,7 @@ while true do
 	print("Fuel Temperature : " .. reactor.getFuelTemperature())
 	print("Case Temperature : " .. reactor.getCasingTemperature())
     print("Rotor Speed : " .. turbine.getRotorSpeed())
-    print("Current fluid flow rate : " .. turbine.getFluidFlowRate)
+    print("Current fluid flow rate : " .. turbine.getFluidFlowRate())
 	gpu.fill(1, 6, w, 1, "-")
 	local percentOfFuel = reactor.getFuelAmount() / reactor.getFuelAmountMax() * 100
 	local percentOfWaste = reactor.getWasteAmount() / reactor.getFuelAmountMax() * 100
@@ -101,7 +101,7 @@ while true do
     print("Insertion of " .. reactor.getControlRodName(1) .. " : " .. reactor.getControlRodLevel(1))
     print("Insertion of " .. reactor.getControlRodName(2) .. " : " .. reactor.getControlRodLevel(2))
     print("Insertion of " .. reactor.getControlRodName(3) .. " : " .. reactor.getControlRodLevel(3))
-    print("Fluid flow rate max : " .. turbine.getFluidFlowrateMax)
+    print("Fluid flow rate max : " .. turbine.getFluidFlowrateMax())
     print("Reactor on : " .. reactor.getActive())
     print("Turbine on : " .. turbine.getActive())
 	gpu.setForeground(0xff5555) -- 0 due to turbine
